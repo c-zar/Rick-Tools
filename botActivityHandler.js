@@ -66,7 +66,7 @@ class BotActivityHandler extends TeamsActivityHandler {
 function createCardCommand(context, action) {
     // The user has chosen to create a card by choosing the 'Create Card' context menu command.
     const data = action.data;
-    const heroCard = CardFactory.heroCard(data.title, data.text, "KEVIN WAS HERE");
+    const heroCard = CardFactory.heroCard("Static Text", getJoke());
     heroCard.content.subtitle = data.subTitle;
     const attachment = { contentType: heroCard.contentType, content: heroCard.content, preview: heroCard };
 
@@ -108,8 +108,7 @@ function shareMessageCommand(context, action) {
     }
 
     console.log(heroCard.content.subtitle);
-    const test = getJoke();
-    heroCard.content.subtitle = test;
+
 
     const attachment = { contentType: heroCard.contentType, content: heroCard.content, preview: heroCard };
 
@@ -125,6 +124,7 @@ function shareMessageCommand(context, action) {
 }
 
 function getJoke() {
+    var ret;
     const options = {
         url: 'https://icanhazdadjoke.com/',
         method: 'GET',
@@ -136,8 +136,9 @@ function getJoke() {
     };
     request(options, function (err, res, body) {
         console.log(body);
-        return body["joke"];
+        ret = body["joke"];
     });
+    return ret;
 }
 
 module.exports.BotActivityHandler = BotActivityHandler;
