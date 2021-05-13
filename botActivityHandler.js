@@ -9,7 +9,7 @@ const {
     ActionTypes
 } = require('botbuilder');
 
-const request = require('request');
+const request = require('request-promise');
 
 class BotActivityHandler extends TeamsActivityHandler {
     constructor() {
@@ -66,7 +66,10 @@ class BotActivityHandler extends TeamsActivityHandler {
 function createCardCommand(context, action) {
     // The user has chosen to create a card by choosing the 'Create Card' context menu command.
     const data = action.data;
-    const heroCard = CardFactory.heroCard("Static Text", getJoke());
+    getJoke().then(test =>{
+        console.log(test);
+    });
+    const heroCard = CardFactory.heroCard("Static Text", "test");
     heroCard.content.subtitle = data.subTitle;
     const attachment = { contentType: heroCard.contentType, content: heroCard.content, preview: heroCard };
 
@@ -124,21 +127,23 @@ function shareMessageCommand(context, action) {
 }
 
 function getJoke() {
-    var ret;
     const options = {
         url: 'https://icanhazdadjoke.com/',
         method: 'GET',
         headers: {
             'Accept': 'application/json',
             'Accept-Charset': 'utf-8',
-            'User-Agent': 'my-reddit-client'
         }
     };
-    request(options, function (err, res, body) {
-        console.log(body);
-        ret = body["joke"];
+    request(options).then((data) => {
+        // console.log(JSON.stringify(data));
+        // console.log(JSON.stringify(data.body));
+        ret = JSON.parse(data)["joke"];
+        console.log(ret);
+        return ret;
     });
-    return ret;
+    // ret = JSON.parse(test.body)["joke"];
+    // return ret;clea
 }
 
 module.exports.BotActivityHandler = BotActivityHandler;
