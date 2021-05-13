@@ -9,6 +9,8 @@ const {
     ActionTypes
 } = require('botbuilder');
 
+const request = require('request');
+
 class BotActivityHandler extends TeamsActivityHandler {
     constructor() {
         super();
@@ -32,12 +34,12 @@ class BotActivityHandler extends TeamsActivityHandler {
            commands to help get you started: createCard and shareMessage.
         */
         switch (action.commandId) {
-        case 'createCard':
-            return createCardCommand(context, action);
-        case 'shareMessage':
-            return shareMessageCommand(context, action);
-        default:
-            throw new Error('NotImplemented');
+            case 'createCard':
+                return createCardCommand(context, action);
+            case 'shareMessage':
+                return shareMessageCommand(context, action);
+            default:
+                throw new Error('NotImplemented');
         }
     }
 
@@ -46,18 +48,18 @@ class BotActivityHandler extends TeamsActivityHandler {
         const attachment = CardFactory.thumbnailCard('Thumbnail Card',
             query.url,
             ['https://raw.githubusercontent.com/microsoft/botframework-sdk/master/icon.png']);
-    
+
         const result = {
             attachmentLayout: 'list',
             type: 'result',
             attachments: [attachment]
         };
-    
+
         const response = {
             composeExtension: result
         };
         return response;
-        }
+    }
     /* Messaging Extension - Unfurling Link */
 }
 
@@ -83,8 +85,8 @@ function shareMessageCommand(context, action) {
     // The user has chosen to share a message by choosing the 'Share Message' context menu command.
     let userName = 'unknown';
     if (action.messagePayload.from &&
-            action.messagePayload.from.user &&
-            action.messagePayload.from.user.displayName) {
+        action.messagePayload.from.user &&
+        action.messagePayload.from.user.displayName) {
         userName = action.messagePayload.from.user.displayName;
     }
 
@@ -95,15 +97,19 @@ function shareMessageCommand(context, action) {
     if (includeImage === 'true') {
         images = ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU'];
     }
-    const heroCard = CardFactory.heroCard(`${ userName } originally sent this message:`,
+    const heroCard = CardFactory.heroCard(`${userName} originally sent this message:`,
         action.messagePayload.body.content,
         images);
 
     if (action.messagePayload.attachments && action.messagePayload.attachments.length > 0) {
         // This sample does not add the MessagePayload Attachments.  This is left as an
         // exercise for the user.
-        heroCard.content.subtitle = `(${ action.messagePayload.attachments.length } Attachments not included)`;
+        heroCard.content.subtitle = `(${action.messagePayload.attachments.length} Attachments not included)`;
     }
+
+    console.log(heroCard.content.subtitle);
+    const test = getJoke();
+    heroCard.content.subtitle = test;
 
     const attachment = { contentType: heroCard.contentType, content: heroCard.content, preview: heroCard };
 
@@ -116,6 +122,22 @@ function shareMessageCommand(context, action) {
             ]
         }
     };
+}
+
+function getJoke() {
+    const options = {
+        url: 'https://icanhazdadjoke.com/',
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Accept-Charset': 'utf-8',
+            'User-Agent': 'my-reddit-client'
+        }
+    };
+    request(options, function (err, res, body) {
+        console.log(body);
+        return body["joke"];
+    });
 }
 
 module.exports.BotActivityHandler = BotActivityHandler;
