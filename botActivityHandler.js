@@ -35,7 +35,9 @@ class BotActivityHandler extends TeamsActivityHandler {
         */
         switch (action.commandId) {
             case 'createCard':
-                return createCardCommand(context, action);
+                return createCardCommand(context, action).then((res) => {
+                    return res;
+                });
             case 'shareMessage':
                 return shareMessageCommand(context, action);
             default:
@@ -65,23 +67,28 @@ class BotActivityHandler extends TeamsActivityHandler {
 
 function createCardCommand(context, action) {
     // The user has chosen to create a card by choosing the 'Create Card' context menu command.
-    const data = action.data;
-    getJoke().then(test =>{
-        console.log(test);
-    });
-    const heroCard = CardFactory.heroCard("Static Text", "test");
-    heroCard.content.subtitle = data.subTitle;
-    const attachment = { contentType: heroCard.contentType, content: heroCard.content, preview: heroCard };
+    return getJoke().then((test) => {
+        console.log("2" + test);
+        const data = action.data;
 
-    return {
-        composeExtension: {
-            type: 'result',
-            attachmentLayout: 'list',
-            attachments: [
-                attachment
-            ]
-        }
-    };
+        console.log("3");
+        const heroCard = CardFactory.heroCard("Static Text", test);
+        heroCard.content.subtitle = data.subTitle;
+        const attachment = { contentType: heroCard.contentType, content: heroCard.content, preview: heroCard };
+
+        return {
+            composeExtension: {
+                type: 'result',
+                attachmentLayout: 'list',
+                attachments: [
+                    attachment
+                ]
+            }
+        };
+    })
+
+
+
 }
 
 function shareMessageCommand(context, action) {
@@ -135,7 +142,7 @@ function getJoke() {
             'Accept-Charset': 'utf-8',
         }
     };
-    request(options).then((data) => {
+    return request(options).then((data) => {
         // console.log(JSON.stringify(data));
         // console.log(JSON.stringify(data.body));
         ret = JSON.parse(data)["joke"];
